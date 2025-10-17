@@ -44,3 +44,5 @@ func main() {
 func startRouter() { //Startet den Server wenn der Roboter gestartet wird
 	router.Run()
 }
+
+//Patrick ist cool
