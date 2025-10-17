@@ -1,0 +1,11 @@
+Endpoints (in json):
+GET /api/poweroff
+GET /api/reboot
+POST /api/motors/[1-4]
+Vaules:
+    steps int
+    clockwise bool
+    rpm int
+GET /api/data/IRGENDWAS O_O
+Returns:
+    data: string

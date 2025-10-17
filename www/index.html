@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoboArm Control Panel</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to the external CSS file -->
+</head>
+<body>
+    <h1>RoboArm Control Panel</h1>
+    <div class="container">
+        <div class="column">
+            <h2>Motor 1</h2>
+            <select class="dropdown">
+                <option value="clockwise">Clockwise</option>
+                <option value="counterclockwise">Counterclockwise</option>
+            </select>
+            <input type="text" class="textbox" placeholder="Degrees">
+            <select class="rpm-dropdown">
+                <option value="30">Slow</option>
+                <option value="60">Medium</option>
+                <option value="90">Fast</option>
+            </select>
+            <button class="rotate-button">Rotate</button>
+        </div>
+        <div class="column">
+            <h2>Motor 2</h2>
+            <select class="dropdown">
+                <option value="clockwise">Clockwise</option>
+                <option value="counterclockwise">Counterclockwise</option>
+            </select>
+            <input type="text" class="textbox" placeholder="Degrees">
+            <select class="rpm-dropdown">
+                <option value="30">Slow</option>
+                <option value="60">Medium</option>
+                <option value="90">Fast</option>
+            </select>
+            <button class="rotate-button">Rotate</button>
+        </div>
+        <div class="column">
+            <h2>Motor 3</h2>
+            <select class="dropdown">
+                <option value="clockwise">Clockwise</option>
+                <option value="counterclockwise">Counterclockwise</option>
+            </select>
+            <input type="text" class="textbox" placeholder="Degrees">
+            <select class="rpm-dropdown">
+                <option value="30">Slow</option>
+                <option value="60">Medium</option>
+                <option value="90">Fast</option>
+            </select>
+            <button class="rotate-button">Rotate</button>
+        </div>
+        <div class="column">
+            <h2>Motor 4</h2>
+            <select class="dropdown">
+                <option value="clockwise">Clockwise</option>
+                <option value="counterclockwise">Counterclockwise</option>
+            </select>
+            <input type="text" class="textbox" placeholder="Degrees">
+            <select class="rpm-dropdown">
+                <option value="30">Slow</option>
+                <option value="60">Medium</option>
+                <option value="90">Fast</option>
+            </select>
+            <button class="rotate-button">Rotate</button>
+        </div>
+    </div>
+    <div class="action-buttons">
+        <button class="action-button" onclick="sendPowerOff()">Power Off</button>
+        <button class="action-button" onclick="sendReboot()">Reboot</button>
+        <button class="action-button" onclick="toggleChroma()">Toggle Chroma</button>
+        <button class="action-button" onclick="logout()">Logout</button> <!-- Logout button -->
+        <button id="admin-tools-button" class="action-button" style="display: none;" onclick="showAdminConsole()">Admin Tools</button> <!-- Admin Tools button -->
+    </div>
+
+    <!-- Admin Console -->
+    <div id="admin-console" style="display: none; margin-top: 20px; padding: 10px; background-color: black; color: white; border: 1px solid white; border-radius: 5px;">
+        <h3>Admin Console</h3>
+        <pre id="admin-console-content">No data available yet.</pre>
+    </div>
+
+    <!-- Login Popup -->
+    <div id="login-popup" class="login-popup" style="display: flex;">
+        <div class="login-container">
+            <h2>Login</h2>
+            <input type="text" id="username" placeholder="Username" class="textbox">
+            <input type="password" id="password" placeholder="Password" class="textbox">
+            <button id="login-button" class="action-button">Login</button>
+            <p id="login-error" style="color: red; display: none;">Invalid credentials. Please try again.</p>
+        </div>
+    </div>
+
+    <script>
+        const port = 80; // Use the same port as in constants.js
+
+        // Function to send motor control data to the backend
+        function sendMotorData(motorId) {
+            const dropdown = document.querySelector(`.column:nth-child(${motorId}) .dropdown`);
+            const textbox = document.querySelector(`.column:nth-child(${motorId}) .textbox`);
+            const rpmDropdown = document.querySelector(`.column:nth-child(${motorId}) .rpm-dropdown`);
+            const direction = dropdown.value === 'clockwise';
+            const degrees = parseFloat(textbox.value);
+            const rpm = parseInt(rpmDropdown.value);
+
+            // Validate input
+            if (isNaN(degrees) || degrees <= 0) {
+                const errorMessage = 'Invalid input: Please enter a valid number of degrees.';
+                alert(errorMessage);
+                logError(errorMessage);
+                return;
+            }
+
+            // Convert degrees to steps
+            const steps = Math.round(degrees * (200 / 360));
+
+            // Send data to the backend
+            fetch(`http://localhost:${port}/api/motors/${motorId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    steps: steps,
+                    clockwise: direction,
+                    rpm: rpm,
+                }),
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Failed to communicate with the backend.');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    alert(data.message);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('Failed to send data to the backend. Please check the connection.');
+                    logError(`Motor ${motorId} Error: ${error.message}`);
+                });
+        }
+
+        // Function to send a power-off request
+        function sendPowerOff() {
+            fetch(`http://localhost:${port}/api/poweroff`, {
+                method: 'GET',
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Failed to communicate with the backend.');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    alert(data.message);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('Failed to send power-off request.');
+                    logError(`Power Off Error: ${error.message}`);
+                });
+        }
+
+        // Function to send a reboot request
+        function sendReboot() {
+            fetch(`http://localhost:${port}/api/reboot`, {
+                method: 'GET',
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Failed to communicate with the backend.');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    alert(data.message);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('Failed to send reboot request.');
+                    logError(`Reboot Error: ${error.message}`);
+                });
+        }
+
+        // Attach event listeners to the rotate buttons
+        document.querySelectorAll('.rotate-button').forEach((button, index) => {
+            button.addEventListener('click', () => sendMotorData(index + 1));
+        });
+
+        let chromaActive = false;
+
+        function toggleChroma() {
+            chromaActive = !chromaActive;
+            document.body.classList.toggle('chroma-active', chromaActive);
+        }
+
+        // Logout functionality
+        function logout() {
+            const loginPopup = document.getElementById('login-popup');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const loginError = document.getElementById('login-error');
+
+            // Clear the input fields
+            usernameInput.value = '';
+            passwordInput.value = '';
+            loginError.style.display = 'none';
+
+            // Show the login popup again
+            loginPopup.style.display = 'flex';
+
+            // Disable interaction with the rest of the page
+            document.body.style.overflow = 'hidden';
+
+            // Disable all other interactive elements
+            const interactiveElements = document.querySelectorAll('button, input, select, a');
+            interactiveElements.forEach((el) => {
+                if (!loginPopup.contains(el)) {
+                    el.setAttribute('disabled', 'true');
+                }
+            });
+        }
+
+        // Function to show the admin console
+        function showAdminConsole() {
+            const adminConsole = document.getElementById('admin-console');
+            const adminConsoleContent = document.getElementById('admin-console-content');
+
+            // Toggle the visibility of the admin console
+            if (adminConsole.style.display === 'none' || adminConsole.style.display === '') {
+                adminConsole.style.display = 'block';
+
+                // Populate the console with current error logs
+                adminConsoleContent.textContent = errorLogs.length
+                    ? errorLogs.join('\n')
+                    : 'No errors detected.';
+            } else {
+                adminConsole.style.display = 'none';
+            }
+        }
+
+        // Array to store error logs
+        const errorLogs = [];
+
+        // Function to log errors and update the admin console
+        function logError(message) {
+            const timestamp = new Date().toLocaleString();
+            errorLogs.push(`[${timestamp}] ${message}`);
+
+            // Update the admin console if it's visible
+            const adminConsole = document.getElementById('admin-console');
+            const adminConsoleContent = document.getElementById('admin-console-content');
+            if (adminConsole.style.display === 'block') {
+                adminConsoleContent.textContent = errorLogs.join('\n');
+            }
+        }
+
+        // Login functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginPopup = document.getElementById('login-popup');
+            const loginButton = document.getElementById('login-button');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const loginError = document.getElementById('login-error');
+            const adminToolsButton = document.getElementById('admin-tools-button');
+
+            // List of valid users
+            const validUsers = [
+                { username: 'Luca', password: '29032010' },
+                { username: 'Catrick', password: 'Bomberpilot' },
+                { username: 'Johannes', password: 'kecks' }
+            ];
+
+            // Ensure the login popup is displayed and blocks interaction
+            loginPopup.style.display = 'flex';
+
+            // Center the popup using flexbox
+            loginPopup.style.justifyContent = 'center';
+            loginPopup.style.alignItems = 'center';
+
+            // Prevent interaction with the rest of the page
+            document.body.style.overflow = 'hidden';
+
+            // Disable all other interactive elements
+            const interactiveElements = document.querySelectorAll('button, input, select, a');
+            interactiveElements.forEach((el) => {
+                if (!loginPopup.contains(el)) {
+                    el.setAttribute('disabled', 'true');
+                }
+            });
+
+            loginButton.addEventListener('click', () => {
+                const username = usernameInput.value;
+                const password = passwordInput.value;
+
+                // Check if the entered credentials match any valid user
+                const isValidUser = validUsers.some(user => user.username === username && user.password === password);
+
+                if (isValidUser) {
+                    loginPopup.style.display = 'none'; // Hide the popup on successful login
+                    document.body.style.overflow = 'auto'; // Re-enable scrolling
+
+                    // Re-enable all interactive elements
+                    interactiveElements.forEach((el) => {
+                        el.removeAttribute('disabled');
+                    });
+
+                    // Show the Admin Tools button only if the user is Luca or Johannes
+                    if (username === 'Luca' || username === 'Johannes') {
+                        adminToolsButton.style.display = 'inline-block';
+                    } else {
+                        adminToolsButton.style.display = 'none';
+                    }
+                } else {
+                    loginError.style.display = 'block'; // Show error message
+                }
+            });
+        });
+    </script>
+</body>
+</html>
