@@ -1,0 +1,186 @@
+Super, das ist ein spannendes Projekt 😄
+Du hast also:
+
+🧠 Raspberry Pi Zero
+
+⚙️ Adafruit 2348 – Stepper Motor HAT
+
+Damit kannst du bis zu 2 Schrittmotoren (oder 4 DC-Motoren) über I²C ansteuern.
+Ich zeig dir jetzt Schritt für Schritt, wie du das einrichtest und Stepper-Motoren steuerst.
+
+🧩 1. Hardware-Verbindung
+
+HAT aufstecken:
+Den Adafruit 2348 direkt auf den GPIO-Header des Raspberry Pi Zero stecken (alle Pins müssen verbunden sein).
+
+Spannungsversorgung:
+
+Der HAT braucht separat 5–12 V (je nach Motor).
+
+Schließe die Spannung an die „Power-Terminals“ des HAT an (nicht an 3.3 V/5 V vom Pi!).
+
+GND vom Netzteil und GND vom Pi müssen gemeinsam verbunden sein.
+
+Stepper anschließen:
+Jeder Stepper hat 2 Spulen, z. B. A+, A−, B+, B−.
+→ Am HAT heißen sie:
+
+Motor 1: M1A, M1B, M2A, M2B
+
+Motor 2: M3A, M3B, M4A, M4B
+
+⚙️ 2. Software installieren
+Aktivieren von I²C
+
+Im Terminal:
+
+sudo raspi-config
+
+
+Dann:
+
+Interfacing Options → I2C → Enable
+
+System aktualisieren:
+sudo apt update
+sudo apt install python3-pip python3-smbus git
+
+Adafruit-Bibliothek installieren:
+pip3 install adafruit-circuitpython-motorkit
+
+🧠 3. Python-Code zum Testen
+Beispiel: Einen Stepper drehen lassen
+from adafruit_motorkit import MotorKit
+from adafruit_motor import stepper
+import time
+
+# Motor-HAT über I2C ansprechen
+kit = MotorKit()
+
+# Motor 1 auswählen
+motor = kit.stepper1
+
+# 100 Schritte vorwärts im Single-Step-Modus
+for i in range(100):
+    motor.onestep(direction=stepper.FORWARD, style=stepper.SINGLE)
+    time.sleep(0.01)
+
+# 100 Schritte rückwärts im Double-Step-Modus
+for i in range(100):
+    motor.onestep(direction=stepper.BACKWARD, style=stepper.DOUBLE)
+    time.sleep(0.01)
+
+# Motor ausschalten (Strom sparen)
+motor.release()
+
+🧩 4. Erklärung der Modi
+Modus	Beschreibung	Drehmoment	Geschwindigkeit
+SINGLE	Eine Spule aktiv	normal	normal
+DOUBLE	Zwei Spulen aktiv	höher	etwas langsamer
+INTERLEAVE	Abwechselnd 1/2 Schritte	gleichmäßig	halbe Schrittgröße
+MICROSTEP	sanfter Lauf, noch kleinere Schritte	sehr gleichmäßig	am langsamsten
+🔍 5. I²C-Adresse prüfen
+
+Wenn du mehrere HATs oder Geräte nutzt:
+
+sudo apt install i2c-tools
+sudo i2cdetect -y 1
+
+
+Der HAT sollte bei 0x60 erscheinen.
+
+🧠 6. Tipps
+
+Raspberry Pi Zero schafft I²C locker, aber Stepper sind stromhungrig → immer separates Netzteil verwenden.
+
+Wenn Motoren ruckeln: time.sleep() leicht erhöhen (z. B. 0.02).
+
+Zum Testen: kleine Drehzahlen und einfache Schleifen nutzen.
+
+Willst du, dass ich dir ein Beispiel zeige, wie man zwei Stepper gleichzeitig steuert (z. B. für einen Roboter oder XY-Plotter)?
+
+
+
+
+
+Perfekt 👍 — hier kommt ganz genau, was du im Linux-Terminal auf deinem Raspberry Pi Zero eingeben musst, um den Adafruit 2348 Stepper Motor HAT betriebsbereit zu machen.
+
+Ich zeig dir jede Zeile in der richtigen Reihenfolge 👇
+
+⚙️ 1️⃣ System vorbereiten
+sudo apt update
+sudo apt upgrade -y
+
+
+Damit wird dein System aktualisiert.
+
+⚙️ 2️⃣ I²C aktivieren
+sudo raspi-config
+
+
+Dann:
+
+Menü → Interfacing Options
+
+→ I2C auswählen
+
+→ Enable
+
+Dann „Finish“ drücken und neu starten:
+
+sudo reboot
+
+⚙️ 3️⃣ Abhängigkeiten installieren
+
+Nach dem Neustart:
+
+sudo apt install -y python3-pip python3-smbus git i2c-tools
+
+
+Damit kannst du I²C und Python-Bibliotheken nutzen.
+
+⚙️ 4️⃣ Adafruit-Bibliothek installieren
+pip3 install adafruit-circuitpython-motorkit
+
+⚙️ 5️⃣ Testen, ob der HAT erkannt wird
+sudo i2cdetect -y 1
+
+
+→ Wenn alles funktioniert, siehst du irgendwo eine Adresse 0x60 (das ist dein Motor-HAT).
+Wenn kein 0x60 erscheint, ist der HAT nicht richtig aufgesteckt oder I²C ist nicht aktiviert.
+
+⚙️ 6️⃣ Test-Python-Datei anlegen
+
+Erstelle eine Datei zum Testen:
+
+nano stepper_test.py
+
+
+Füge das hier ein:
+
+from adafruit_motorkit import MotorKit
+from adafruit_motor import stepper
+import time
+
+kit = MotorKit()
+motor = kit.stepper1
+
+for i in range(100):
+    motor.onestep(direction=stepper.FORWARD, style=stepper.SINGLE)
+    time.sleep(0.01)
+
+motor.release()
+
+
+Dann speichern mit:
+
+Strg + O   → Enter   → Strg + X
+
+⚙️ 7️⃣ Test starten
+python3 stepper_test.py
+
+
+→ Dein Stepper sollte sich jetzt drehen 🎉
+
+Wenn du magst, kann ich dir als Nächstes zeigen, wie man zwei Stepper gleichzeitig oder in verschiedenen Modi (z. B. INTERLEAVE / MICROSTEP) laufen lässt.
+Willst du das?
