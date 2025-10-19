@@ -1,3 +1,6 @@
+
+
+
 > Written with [StackEdit](https://stackedit.io/).
 ## Official HASE Roboterarm Dokumentation
 *This is the official dokumentation for the Roboterarm Project at Humbold Academy for Science and Engeniering*
@@ -17,8 +20,10 @@ sequenceDiagram
 Rasberry Pi 0 ->> Adafruit 2348 Stepper Driver Hat (0x60): Via I2C
 Rasberry Pi 0 ->> Adafruit 2348 Stepper Driver Hat (0x61): Via I2C
 
-Adafruit 2348 Stepper Driver Hat (0x60) --> Motor 1: 
-Adafruit 2348 Stepper Driver Hat (0x60) --> Motor 2: 
+Adafruit 2348 Stepper Driver Hat (0x60) ->> Motor 1: 
+Adafruit 2348 Stepper Driver Hat (0x60) ->> Motor 2: 
+Adafruit 2348 Stepper Driver Hat (0x61) ->> Motor 3:
+Adafruit 2348 Stepper Driver Hat (0x61) ->> Motor 4:
 
 
 ```
