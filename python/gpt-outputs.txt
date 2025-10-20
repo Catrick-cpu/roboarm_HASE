@@ -184,3 +184,153 @@ python3 stepper_test.py
 
 Wenn du magst, kann ich dir als Nächstes zeigen, wie man zwei Stepper gleichzeitig oder in verschiedenen Modi (z. B. INTERLEAVE / MICROSTEP) laufen lässt.
 Willst du das?
+
+
+
+
+
+
+
+
+
+
+
+-----------------------------------------------------------------------------
+Sehr gut 😄
+Das ist die sauberste und professionellste Variante — wir bauen also eine Konsolen-UI mit Eingabezeile, bei der du Befehle wie diese eingibst:
+
+steppermotor(1, forward, 200)
+
+
+Damit kannst du alle vier Stepper über zwei HATs ansteuern.
+Ich erklär dir alles, und danach bekommst du den kompletten Python-Code 👇
+
+🧠 Konzept
+
+Der Befehl hat die Form:
+
+steppermotor(<motornummer>, <richtung>, <anzahl_schritte>)
+
+
+<motornummer> → 1 bis 4
+
+<richtung> → forward oder backward
+
+<anzahl_schritte> → beliebige Anzahl Schritte (z. B. 200)
+
+Optional kannst du auch die Geschwindigkeit angeben:
+
+steppermotor(2, backward, 400, 0.01)
+
+
+(0.01 = 10 ms Pause zwischen Schritten)
+
+⚙️ Komplettes Python-Programm
+from adafruit_motorkit import MotorKit
+from adafruit_motor import stepper
+import board
+import busio
+import time
+import re
+
+# --- I2C initialisieren ---
+i2c = busio.I2C(board.SCL, board.SDA)
+
+# Zwei HATs mit Adressen 0x60 und 0x61
+kit1 = MotorKit(i2c=i2c, address=0x60)
+kit2 = MotorKit(i2c=i2c, address=0x61)
+
+# Stepper-Objekte
+motors = [
+    kit1.stepper1,
+    kit1.stepper2,
+    kit2.stepper1,
+    kit2.stepper2
+]
+
+print("StepperMotor Konsole gestartet ✅")
+print("Befehl: steppermotor(<1–4>, <forward/backward>, <steps>, [delay])")
+print("Beispiel: steppermotor(2, forward, 200, 0.005)")
+print("Beenden mit: exit")
+
+def move_stepper(motor_id, direction, steps, delay):
+    """Führt die Bewegung eines Steppers aus."""
+    motor = motors[motor_id - 1]
+    dir_map = {
+        "forward": stepper.FORWARD,
+        "backward": stepper.BACKWARD
+    }
+
+    dir_value = dir_map.get(direction.lower())
+    if dir_value is None:
+        print("❌ Ungültige Richtung! Nutze 'forward' oder 'backward'.")
+        return
+
+    print(f"➡️  Motor {motor_id}: {direction} ({steps} Schritte, delay={delay})")
+
+    for _ in range(steps):
+        motor.onestep(direction=dir_value, style=stepper.SINGLE)
+        time.sleep(delay)
+
+    motor.release()
+    print(f"✅ Motor {motor_id} fertig\n")
+
+# --- Haupt-Eingabe-Schleife ---
+while True:
+    try:
+        command = input(">>> ").strip()
+
+        if command.lower() in ("exit", "quit"):
+            print("Beende Programm…")
+            break
+
+        # Beispiel: steppermotor(2, forward, 200, 0.005)
+        match = re.match(
+            r"steppermotor\(\s*(\d+)\s*,\s*([a-zA-Z]+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)",
+            command
+        )
+
+        if match:
+            motor_id = int(match.group(1))
+            direction = match.group(2)
+            steps = int(match.group(3))
+            delay = float(match.group(4)) if match.group(4) else 0.01
+
+            if 1 <= motor_id <= 4:
+                move_stepper(motor_id, direction, steps, delay)
+            else:
+                print("❌ Motornummer muss zwischen 1 und 4 liegen.")
+        else:
+            print("❌ Ungültiger Befehl! Beispiel: steppermotor(1, forward, 200, 0.01)")
+
+    except KeyboardInterrupt:
+        break
+    except Exception as e:
+        print(f"Fehler: {e}")
+
+# Motoren ausschalten
+for m in motors:
+    m.release()
+
+print("Programm beendet ✅")
+
+🧩 Beispiel-Eingaben
+Eingabe	Bedeutung
+steppermotor(1, forward, 200)	Motor 1 dreht 200 Schritte vorwärts
+steppermotor(3, backward, 400, 0.005)	Motor 3 dreht 400 Schritte rückwärts, 5 ms Pause
+steppermotor(4, forward, 800, 0.002)	Motor 4 dreht schnell vorwärts
+exit	Programm beenden
+🧠 Tipps
+
+Wenn sich ein Motor nicht bewegt → prüfe I²C-Verbindung und Stromversorgung.
+
+Du kannst das Script jederzeit mit Strg + C abbrechen.
+
+Für sehr schnelle Bewegungen (delay < 0.002) kann der Raspberry Pi Zero manchmal zu langsam sein → lieber bei 0.005–0.01 bleiben.
+
+Willst du, dass ich das Programm erweitere, sodass man mehrere Befehle in einer Zeile eingeben kann, z. B.:
+
+steppermotor(1, forward, 100); steppermotor(2, backward, 100)
+
+
+(dann laufen beide nacheinander automatisch)?

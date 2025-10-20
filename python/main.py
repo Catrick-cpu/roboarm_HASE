@@ -1,34 +1,18 @@
 from adafruit_motorkit import MotorKit
 from adafruit_motor import stepper
-import time
 import board
 import busio
-import os 
-import curses
+import time
+import re
 
-#Requirements installieren:
-
-#sudo apt update
-#sudo apt install -y python3-pip python3-smbus git i2c-tools
-#pip3 install adafruit-circuitpython-motorkit
-#pip install curses
-
-
-#I2C Adresses: 60, 61
-#As Integer: 96, 97
-
-os.system("sudo i2cdetect -y 1") #Prüfen ob Motor HATS gefunden werden
-#   ⬆ sollte etwas anzeigen wie 60, 61 ⬆
-
-
-# I2C initialisieren
+# --- I2C initialisieren ---
 i2c = busio.I2C(board.SCL, board.SDA)
 
-# Zwei HATs
+# Zwei HATs mit Adressen 0x60 und 0x61
 kit1 = MotorKit(i2c=i2c, address=0x60)
 kit2 = MotorKit(i2c=i2c, address=0x61)
 
-# Motoren
+# Stepper-Objekte
 motors = [
     kit1.stepper1,
     kit1.stepper2,
@@ -36,61 +20,68 @@ motors = [
     kit2.stepper2
 ]
 
-# Namen der Motoren
-motor_names = ["Motor 1", "Motor 2", "Motor 3", "Motor 4"]
+print("StepperMotor Konsole gestartet ✅")
+print("Befehl: steppermotor(<1–4>, <forward/backward>, <steps>, [delay])")
+print("Beispiel: steppermotor(2, forward, 200, 0.005)")
+print("Beenden mit: exit")
 
-# Initial ausgewählter Motor
-current = 0#
+def move_stepper(motor_id, direction, steps, delay):
+    """Führt die Bewegung eines Steppers aus."""
+    motor = motors[motor_id - 1]
+    dir_map = {
+        "forward": stepper.FORWARD,
+        "backward": stepper.BACKWARD
+    }
 
-# Funktion für das UI
-def main(stdscr):
-    global current
-    curses.curs_set(0)  # Cursor ausblenden
-    stdscr.nodelay(1)   # Keine Blockierung bei getch()
-    stdscr.timeout(100)
+    dir_value = dir_map.get(direction.lower())
+    if dir_value is None:
+        print("❌ Ungültige Richtung! Nutze 'forward' oder 'backward'.")
+        return
 
-    while True:
-        stdscr.clear()
-        stdscr.addstr(0, 0, "Stepper Motor Konsole (ESC zum Beenden)")
-        stdscr.addstr(1, 0, "Benutze Pfeiltasten: ↑↓ →← für Vorwärts/Rückwärts")
-        stdscr.addstr(2, 0, "Wechseln mit: w (hoch) / s (runter)")
-        stdscr.addstr(4, 0, "Ausgewählter Motor:")
+    print(f"➡️  Motor {motor_id}: {direction} ({steps} Schritte, delay={delay})")
 
-        for idx, name in enumerate(motor_names):
-            marker = "->" if idx == current else "  "
-            stdscr.addstr(5 + idx, 0, f"{marker} {name}")
+    for _ in range(steps):
+        motor.onestep(direction=dir_value, style=stepper.SINGLE)
+        time.sleep(delay)
 
-        key = stdscr.getch()
+    motor.release()
+    print(f"✅ Motor {motor_id} fertig\n")
 
-        if key == 27:  # ESC
+# --- Haupt-Eingabe-Schleife ---
+while True:
+    try:
+        command = input(">>> ").strip()
+
+        if command.lower() in ("exit", "quit"):
+            print("Beende Programm…")
             break
-        elif key == ord('w'):  # Motor hoch
-            current = (current - 1) % len(motors)
-        elif key == ord('s'):  # Motor runter
-            current = (current + 1) % len(motors)
-        elif key == curses.KEY_UP:  # Vorwärts
-            motors[current].onestep(direction=stepper.FORWARD, style=stepper.SINGLE)
-        elif key == curses.KEY_DOWN:  # Rückwärts
-            motors[current].onestep(direction=stepper.BACKWARD, style=stepper.SINGLE)
 
-        stdscr.refresh()
+        # Beispiel: steppermotor(2, forward, 200, 0.005)
+        match = re.match(
+            r"steppermotor\(\s*(\d+)\s*,\s*([a-zA-Z]+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)",
+            command
+        )
 
-    # Alle Motoren ausschalten
-    for m in motors:
-        m.release()
+        if match:
+            motor_id = int(match.group(1))
+            direction = match.group(2)
+            steps = int(match.group(3))
+            delay = float(match.group(4)) if match.group(4) else 0.01
 
-# curses starten
-curses.wrapper(main)
+            if 1 <= motor_id <= 4:
+                move_stepper(motor_id, direction, steps, delay)
+            else:
+                print("❌ Motornummer muss zwischen 1 und 4 liegen.")
+        else:
+            print("❌ Ungültiger Befehl! Beispiel: steppermotor(1, forward, 200, 0.01)")
 
-#Funktionsweise:
+    except KeyboardInterrupt:
+        break
+    except Exception as e:
+        print(f"Fehler: {e}")
 
-#w / s → ausgewählten Motor wechseln
+# Motoren ausschalten
+for m in motors:
+    m.release()
 
-#↑ → Motor vorwärts
-
-#↓ → Motor rückwärts
-
-#ESC → Programm beenden
-
-#Alle Motoren werden am Ende ausgeschaltet (release())
-
+print("Programm beendet ✅")
