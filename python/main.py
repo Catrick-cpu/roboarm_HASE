@@ -2,7 +2,7 @@ from adafruit_motorkit import MotorKit
 from adafruit_motor import stepper
 import board
 import busio
-import time as t
+import time as
 import re
 import os
 
@@ -44,9 +44,10 @@ motors = [
 print("StepperMotor Konsole gestartet ")
 print("Befehl: steppermotor(<1–4>, <forward/backward>, <steps>, [delay])")
 print("Je größer der wert delay, desto langsamer drehen sich die motoren da der abstand zwischen den" /n "größer ist ")
-s
+time.sleep(2)
 print("Beispiel: steppermotor(2, forward, 200, 0.005)")
 print("Beenden mit: exit")
+time.sleep(2)
 
 def move_stepper(motor_id, direction, steps, delay):
     """Führt die Bewegung eines Steppers aus."""
