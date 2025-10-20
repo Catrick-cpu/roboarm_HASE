@@ -20,7 +20,7 @@ motors = [
     kit2.stepper2
 ]
 
-print("StepperMotor Konsole gestartet ✅")
+print("StepperMotor Konsole gestartet ")
 print("Befehl: steppermotor(<1–4>, <forward/backward>, <steps>, [delay])")
 print("Beispiel: steppermotor(2, forward, 200, 0.005)")
 print("Beenden mit: exit")
@@ -35,19 +35,19 @@ def move_stepper(motor_id, direction, steps, delay):
 
     dir_value = dir_map.get(direction.lower())
     if dir_value is None:
-        print("❌ Ungültige Richtung! Nutze 'forward' oder 'backward'.")
+        print("Ungültige Richtung! Nutze 'forward' oder 'backward'.")
         return
 
-    print(f"➡️  Motor {motor_id}: {direction} ({steps} Schritte, delay={delay})")
+    print(f"Motor {motor_id}: {direction} ({steps} Schritte, delay={delay})")
 
     for _ in range(steps):
         motor.onestep(direction=dir_value, style=stepper.SINGLE)
         time.sleep(delay)
 
     motor.release()
-    print(f"✅ Motor {motor_id} fertig\n")
+    print(f"Motor {motor_id} fertig\n")
 
-# --- Haupt-Eingabe-Schleife ---
+#main loop
 while True:
     try:
         command = input(">>> ").strip()
@@ -71,9 +71,9 @@ while True:
             if 1 <= motor_id <= 4:
                 move_stepper(motor_id, direction, steps, delay)
             else:
-                print("❌ Motornummer muss zwischen 1 und 4 liegen.")
+                print("Motornummer muss zwischen 1 und 4 liegen.")
         else:
-            print("❌ Ungültiger Befehl! Beispiel: steppermotor(1, forward, 200, 0.01)")
+            print("Ungültiger Befehl! Beispiel: steppermotor(1, forward, 200, 0.01)")
 
     except KeyboardInterrupt:
         break
@@ -84,4 +84,4 @@ while True:
 for m in motors:
     m.release()
 
-print("Programm beendet ✅")
+print("Programm beendet")
