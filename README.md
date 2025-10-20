@@ -1,7 +1,4 @@
 
-
-
-> Written with [StackEdit](https://stackedit.io/).
 ## Official HASE Roboterarm Dokumentation
 *This is the official dokumentation for the Roboterarm Project at Humbold Academy for Science and Engeniering*
 
