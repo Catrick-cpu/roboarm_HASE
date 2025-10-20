@@ -19,6 +19,12 @@
 core
 out
 
+#Venv, ist unnötig und macht (manche) git-Operationen langsamer
+venv/
+
+# KDE Ordnereinstellungen
+.directory
+
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
