@@ -4,15 +4,36 @@ import board
 import busio
 import time
 import re
+import os
 
-# --- I2C initialisieren ---
+#Requirements installieren:
+
+#sudo apt update
+#sudo apt install -y python3-pip python3-smbus git i2c-tools
+#pip3 install adafruit-circuitpython-motorkit
+#pip install curses
+
+#I2C Adresses: 60, 61
+#As Integer: 96, 97
+
+
+print("Starting up...")
+
+print("The following command should show something like 0x60 ----  0x61")
+time.sleep(1)
+
+
+os.system("sudo i2cdetect -y 1") #Prüfen ob Motor HATS gefunden werden
+
+
+# initialise
 i2c = busio.I2C(board.SCL, board.SDA)
 
-# Zwei HATs mit Adressen 0x60 und 0x61
+#HAT Defenitions with adresses 0x60, 0x612
 kit1 = MotorKit(i2c=i2c, address=0x60)
 kit2 = MotorKit(i2c=i2c, address=0x61)
 
-# Stepper-Objekte
+#Motor Defenitions
 motors = [
     kit1.stepper1,
     kit1.stepper2,
@@ -73,7 +94,9 @@ while True:
             else:
                 print("Motornummer muss zwischen 1 und 4 liegen.")
         else:
-            print("Ungültiger Befehl! Beispiel: steppermotor(1, forward, 200, 0.01)")
+            print("unknown command")
+            print("usage:  steppermotor(1, forward, 200, 0.01)")
+
 
     except KeyboardInterrupt:
         break
