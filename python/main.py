@@ -2,7 +2,7 @@ from adafruit_motorkit import MotorKit
 from adafruit_motor import stepper
 import board
 import busio
-import time as
+import time
 import re
 import os
 
