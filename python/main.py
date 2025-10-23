@@ -43,7 +43,7 @@ motors = [
 
 print("StepperMotor Konsole gestartet ")
 print("Befehl: steppermotor(<1–4>, <forward/backward>, <steps>, [delay])")
-print("Je größer der wert delay, desto langsamer drehen sich die motoren da der abstand zwischen den" /n "größer ist ")
+print("Je größer der wert delay, desto langsamer drehen sich die motoren da der abstand zwischen den, größer ist ")
 time.sleep(2)
 print("Beispiel: steppermotor(2, forward, 200, 0.005)")
 print("Beenden mit: exit")
