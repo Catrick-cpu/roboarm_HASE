@@ -20,7 +20,7 @@ core
 out
 
 #Venv, ist unnötig und macht (manche) git-Operationen langsamer
-venv/
+/venv
 
 # KDE Ordnereinstellungen
 .directory
@@ -35,5 +35,3 @@ go.work.sum
 # env file
 .env
 
-
-/venv
