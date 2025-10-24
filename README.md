@@ -1,15 +1,15 @@
 
 ## Official HASE Roboterarm Dokumentation
-*This is the official dokumentation for the Roboterarm Project at Humbold Academy for Science and Engeniering*
+*This is the official documentation for the Roboterarm Project at Humbold Academy for Science and Engeniering*
 
 What we use:
 Rasberry Pi 0 
 2 Adafruit 2348 Stepper Driver Hat
-4  Motors from Amazon
+4 Motors from Amazon
 
 How it works:
-We use Python to controll the Motor Drivers. The Rasberry Pi is connectet via ssh to our PC. 
-The Motor Drivers are connectet to the Rasberry Pi via I2C they have the Adresses 0x60 and 0x61
+We use Python to control the Motor Drivers. The Rasberry Pi is connected via ssh to our PC. 
+The Motor Drivers are connected to the Rasberry Pi via I2C, and they have the Adresses 0x60 and 0x61
 
 ```mermaid
 sequenceDiagram
