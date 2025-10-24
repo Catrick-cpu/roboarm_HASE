@@ -22,9 +22,6 @@ def handle_client(client_socket):
     client_socket.close()
 
 while True: 
-    # When a client connects we receive the 
-    # client socket into the client variable, and 
-    # the remote connection details into the addr variable
     client, addr = server.accept() 
     print(f"[+] Accepted connection from: {addr[0]}:{addr[1]}")
     #spin up our client thread to handle the incoming data 
