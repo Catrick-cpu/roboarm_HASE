@@ -5,6 +5,13 @@ import busio
 import time
 import re
 import os
+import random
+
+
+
+# DISCLAIMER
+# IF YOU HAVE NONE OF THE REQUIREMENTS INSTALLED 
+#YOU HAVE TO COPY THEM OUT OF FOLDER "NOPIP" TO "python"
 
 #Requirements installieren:
 
@@ -15,6 +22,62 @@ import os
 
 #I2C Adresses: 60, 61
 #As Integer: 96, 97
+
+#sudo apt install -y i2c-tools
+
+
+
+
+
+#Funktion	Raspberry Pi Pin	Bezeichnung	Richtung	Erklärung
+#SDA (Data)	Pin 3	GPIO 2		Datenleitung (seriell bidirektional)
+#SCL (Clock)	Pin 5	GPIO 3		Taktleitung (gibt Datenrhythmus vor)
+#GND	Pin 6 (oder 9, 14, 20, 25, 30, 34, 39)	Ground		Gemeinsame Masse, sehr wichtig!
+#3.3 V / 5 V	Pin 1 oder 2	Versorgung (optional)		Nur falls dein Sensor/Board das braucht — der Motor-HAT bekommt aber seine eigene Stromquelle!
+
+#Raspberry Pi Zero
+# ├── Pin 3 (SDA) ───────────── SDA (auf HAT)
+# ├── Pin 5 (SCL) ───────────── SCL (auf HAT)
+# ├── Pin 6 (GND) ───────────── GND (auf HAT + Motor-Netzteil)
+# └── Pin 2 (5V)   ──────────── nur Logikstrom (wenn HAT direkt aufgesteckt)
+
+#Motor-HAT
+# ├── VIN  → 5–12 V Netzteil (+)
+# ├── GND  → Netzteil (–) UND Pi-GND
+# ├── M1A/M1B → Stepper 1 Spule A
+# ├── M2A/M2B → Stepper 1 Spule B
+# ├── (M3A–M4B für Stepper 2)
+
+
+
+#Jeder HAT braucht eigene Motor-Stromversorgung (oder eine gemeinsame mit genügend Ampere).
+
+#Auf dem zweiten HAT den A0-Jumper schließen/löten, damit er die Adresse 0x61 bekommt.
+
+
+##SDA (Pin 3) und SCL (Pin 5) verbunden	
+#GND vom Netzteil und Pi gemeinsam	
+#A0-Jumper auf zweitem HAT gesetzt	
+#sudo raspi-config → I2C enabled	
+#sudo i2cdetect -y 1 zeigt 0x60/0x61	
+
+#Willst du, dass ich dir eine kleine Grafik (Verdrahtungsdiagramm) dazu mache, wie alles zusammengehört (Pi Zero → zwei HATs → Stepper)?
+#Dann kann ich sie dir sofort erzeugen.
+
+
+input('Do you want to play a game? (y/n)')
+if input == 'y':
+    input('Guess a random number between 1 and 10: ')
+    n = random.randint(1,10)
+    if input == n:
+        print('You won!!!!')
+
+    else:
+        print('You entered the wrong number')
+
+
+
+
 
 
 print("Starting up...")
