@@ -72,4 +72,5 @@ func postMotors(c *gin.Context) { //Verarbeiten von Motor-Befehlen
 	slog.Info("Bewege " + motorid + " | Steps: " + strconv.Itoa(data.Steps) + " | RPM: " + strconv.Itoa(data.Rpm) + " | Uhrzeigersinn: " + strconv.FormatBool(data.Clockwise))
 	c.Data(http.StatusOK, gin.MIMEPlain, []byte("Bewege "+motorid+" | Steps: "+strconv.Itoa(data.Steps)+" | RPM: "+strconv.Itoa(data.Rpm)+" | Uhrzeigersinn: "+strconv.FormatBool(data.Clockwise)))
 	//Antwort mit ALLEN Daten und Log schreiben
+
 }
