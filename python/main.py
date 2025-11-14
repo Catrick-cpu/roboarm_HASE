@@ -60,6 +60,9 @@ import random
 # Dann kann ich sie dir sofort erzeugen.
 
 
+# win ip =
+
+
 input("Do you want to play a game? (y/n)")
 if input == "y":
     input("Guess a random number between 1 and 10: ")
